@@ -3,11 +3,14 @@ package com.marcus.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -27,29 +30,67 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     DataSource dataSource;
 
+    /**
+     * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
+     * For more details, see our guide on the Default Password Encoder in Spring Security 5:
+     * - https://www.baeldung.com/spring-security-5-default-password-encoder
+     * @return
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     ///////////////
     // AUTOWIRED //
     ///////////////
 
+    /*
+    There are 2 ways to configure AuthenticationManagerBuilder:
+    - global: via @Autowired
+    - local: via @Override
+     */
+
+    /**
+     * Global AuthenticationManagerBuilder
+     * @param auth
+     * @throws Exception
+     */
+//    @Autowired
+//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.inMemoryAuthentication()
+//                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
+//                .and()
+//                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+//    }
+
+    //////////////
+    // OVERRIDE //
+    //////////////
+
+    /**
+     * Local Anonymous AuthenticationManagerBuilder
+     * @param auth
+     * @throws Exception
+     */
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // 1 - In Memory Authentication
-        auth.inMemoryAuthentication()
+        auth.inMemoryAuthentication().passwordEncoder(passwordEncoder())
                 .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
                 .and()
                 .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
 
         // 2 - JDBC Authentication
-//        auth.jdbcAuthentication().dataSource(dataSource)
+//        auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder())
 //                .withDefaultSchema() // creates 2 tables: Users & Authorities
 //                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
 //                .and()
 //                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
-    }
 
-    //////////////
-    // OVERRIDE //
-    //////////////
+        // 3 - UserDetailsService
+//        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+    }
 
     /**
      * role admin allow to access /admin/**
@@ -128,19 +169,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .deleteCookies(cookieNamesToClear);
     }
 
-    /**
-     * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
-     * For more details, see our guide on the Default Password Encoder in Spring Security 5:
-     * - https://www.baeldung.com/spring-security-5-default-password-encoder
-     * @return
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
 //    /**
-//     * Spring Boot configured this already.
+//     * Spring Boot has a default configuration for this already.
 //     * @param web
 //     * @throws Exception
 //     */

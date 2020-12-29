@@ -1,6 +1,7 @@
 package com.marcus.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
@@ -16,4 +17,9 @@ import org.springframework.security.config.annotation.method.configuration.Globa
         securedEnabled = true,
         jsr250Enabled = true)
 public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        super.configure(auth);
+    }
 }
