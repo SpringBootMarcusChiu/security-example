@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.sql.DataSource;
+
 /**
  * http://docs.spring.io/spring-boot/docs/current/reference/html/howto-security.html
  * @EnableWebSecurity
@@ -22,18 +24,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    DataSource dataSource;
+
     ///////////////
     // AUTOWIRED //
     ///////////////
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        // 1 - In Memory Authentication
         auth.inMemoryAuthentication()
                 .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
                 .and()
-                .withUser("user2").password(passwordEncoder().encode("password")).roles("USER")
-                .and()
                 .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+
+        // 2 - JDBC Authentication
+//        auth.jdbcAuthentication().dataSource(dataSource)
+//                .withDefaultSchema() // creates 2 tables: Users & Authorities
+//                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
+//                .and()
+//                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
     }
 
     //////////////
@@ -72,8 +83,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().disable().authorizeRequests()
             // the more specific rules need to come first, followed by the more general ones
             .antMatchers("/", "/home", "/about").permitAll()
-            .antMatchers("/admin/**").hasAnyRole("ADMIN")
-            .antMatchers("/user/**").hasAnyRole("USER")
+            .antMatchers("/admin/**").hasRole("ADMIN")
+            .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
             .anyRequest().authenticated()
 
             .and()
@@ -101,10 +112,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
 
             // LOGOUT STUFF
-            .logout()
-            .logoutUrl("/perform_logout") // the custom logout
-            .deleteCookies("JSESSIONID");
-            //.logoutSuccessHandler(logoutSuccessHandler());
+            // By default, a logout request:
+            // - invalidates the session
+            // - clears any authentication caches
+            // - clears the SecurityContextHolder
+            // - redirects to login page
+            // Simple Logout Config
+            .logout(); // simple logout config
+            // Custom Logout Config
+//            .logout().logoutUrl("/my/logout")
+//                .logoutSuccessUrl("/my/index")
+//                .logoutSuccessHandler(logoutSuccessHandler)
+//                .invalidateHttpSession(true)
+//                .addLogoutHandler(logoutHandler)
+//                .deleteCookies(cookieNamesToClear);
     }
 
     /**
