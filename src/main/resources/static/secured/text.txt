@@ -1,0 +1,1 @@
+static/secured/text.txt

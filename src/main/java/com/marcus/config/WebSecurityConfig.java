@@ -3,18 +3,14 @@ package com.marcus.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.sql.DataSource;
 
 /**
  * http://docs.spring.io/spring-boot/docs/current/reference/html/howto-security.html
@@ -27,14 +23,11 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    DataSource dataSource;
-
     /**
      * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
      * For more details, see our guide on the Default Password Encoder in Spring Security 5:
      * - https://www.baeldung.com/spring-security-5-default-password-encoder
-     * @return
+     * @return PasswordEncoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -53,51 +46,71 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Global AuthenticationManagerBuilder
-     * @param auth
-     * @throws Exception
+     * @param auth AuthenticationManagerBuilder
+     * @throws Exception exception
      */
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.inMemoryAuthentication()
-//                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
-//                .and()
-//                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
-//    }
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+                .withUser("user").password(passwordEncoder().encode("password")).roles("USER")
+                .and()
+                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+    }
 
     //////////////
     // OVERRIDE //
     //////////////
 
-    /**
-     * Local Anonymous AuthenticationManagerBuilder
-     * @param auth
-     * @throws Exception
-     */
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // 1 - In Memory Authentication
-        auth.inMemoryAuthentication().passwordEncoder(passwordEncoder())
-                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
-                .and()
-                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
-
-        // 2 - JDBC Authentication
-//        auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder())
-//                .withDefaultSchema() // creates 2 tables: Users & Authorities
-//                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
+//    /**
+//     * Local Anonymous AuthenticationManagerBuilder
+//     * @param auth AuthenticationManagerBuilder
+//     * @throws Exception exception
+//     */
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        // 1 - In Memory Authentication
+//        auth.inMemoryAuthentication().passwordEncoder(passwordEncoder())
+//                .withUser("user").password(passwordEncoder().encode("password")).roles("USER")
 //                .and()
 //                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+//
+//        // 2 - JDBC Authentication
+////        auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder())
+////                .withDefaultSchema() // creates 2 tables: Users & Authorities
+////                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
+////                .and()
+////                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+//
+//        // 3 - UserDetailsService
+////        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+//    }
 
-        // 3 - UserDetailsService
-//        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+    /**
+     * Spring Boot has a default configuration for this already.
+     * @param web WebSecurity
+     * @throws Exception exception
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web
+                .ignoring() // the following URl patterns to bypass Spring Security
+                .antMatchers("/not-default/**") // resources/static/pokemon/**
+                .antMatchers("/resources/**")
+//                .antMatchers("/user/**") // this will cause ${#httpServletRequest.remoteUser} to be null
+//                .antMatchers("/admin/**") // this will cause ${#httpServletRequest.remoteUser} to be null
+                .antMatchers("/css/**")
+                .antMatchers("/js/**")
+                .antMatchers("/images/**");
+//                .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
+        //                .requestMatchers(EndpointRequest.to("health"));
     }
 
     /**
      * role admin allow to access /admin/**
      * role user allow to access /user/**
      * custom 403 access denied handler
-     * @param http
-     * @throws Exception
+     * @param http HttpSecurity
+     * @throws Exception exception
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -121,9 +134,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
 
             //
-            .csrf().disable().authorizeRequests()
+//            .csrf().disable()
+            .authorizeRequests()
             // the more specific rules need to come first, followed by the more general ones
-            .antMatchers("/", "/home", "/about").permitAll()
+            .antMatchers("/", "/home", "/about", "/webjars/bootstrap/**").permitAll() // or place in WebSecurity.ignore.antMatchers
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
             .anyRequest().authenticated()
@@ -134,21 +148,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //            .formLogin().loginPage("/login").permitAll()
 //            .and()
 //            .logout().permitAll();
-            .formLogin()
-            .loginPage("/login") // the custom login page
-            // The default URL where the Spring Login will POST to trigger the authentication
-            // process is /login which used to be /j_spring_security_check before Spring Security 4.
-            // We can use the loginProcessingUrl() method to override this URL
-            .loginProcessingUrl("/perform_login") // the URL to submit the username and password to
-            // After a successful login process, the user is redirected to a page – which by default
-            // is the root of the web application.
-            // We can override this via the defaultSuccessUrl() method
-            .defaultSuccessUrl("/home", true) // the landing page after a successful login
-            // Same as with the Login Page, the Login Failure Page is autogenerated by Spring
-            // Security at /login?error by default.
-            // To override this, we can use the failureUrl() method
-            .failureUrl("/login?error=true") // the landing page after an unsuccessful login
-            //.failureHandler(authenticationFailureHandler()) //
+            .formLogin() //.permitAll()
+                .loginPage("/login").permitAll() // the custom login page
+                // The default URL where the Spring Login will POST to trigger the authentication
+                // process is /login which used to be /j_spring_security_check before Spring Security 4.
+                // We can use the loginProcessingUrl() method to override this URL
+//                .loginProcessingUrl("/perform_login") // the URL to submit the username and password to
+                // After a successful login process, the user is redirected to a page – which by default
+                // is the root of the web application.
+                // We can override this via the defaultSuccessUrl() method
+//                .defaultSuccessUrl("/home", true).permitAll() // the landing page after a successful login
+                // Same as with the Login Page, the Login Failure Page is autogenerated by Spring
+                // Security at /login?error by default.
+                // To override this, we can use the failureUrl() method
+//                .failureUrl("/login?error=true").permitAll() // the landing page after an unsuccessful login
+                //.failureHandler(authenticationFailureHandler()) //
 
             .and()
 
@@ -159,25 +173,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // - clears the SecurityContextHolder
             // - redirects to login page
             // Simple Logout Config
-            .logout(); // simple logout config
+            .logout().permitAll(); // simple logout config
             // Custom Logout Config
-//            .logout().logoutUrl("/my/logout")
+//                .logoutUrl("/logout");
 //                .logoutSuccessUrl("/my/index")
 //                .logoutSuccessHandler(logoutSuccessHandler)
 //                .invalidateHttpSession(true)
 //                .addLogoutHandler(logoutHandler)
 //                .deleteCookies(cookieNamesToClear);
     }
-
-//    /**
-//     * Spring Boot has a default configuration for this already.
-//     * @param web
-//     * @throws Exception
-//     */
-//    @Override
-//    public void configure(WebSecurity web) throws Exception {
-//        web
-//                .ignoring()
-//                .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
-//    }
 }
