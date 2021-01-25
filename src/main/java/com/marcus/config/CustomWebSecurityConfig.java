@@ -18,10 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * - annotation is crucial if we disable the default Spring Boot security configuration
  * - if missing, the application will fail to start. The annotation is only optional if
  *   we're just overriding the default behavior using a WebSecurityConfigurerAdapter
+ * - contains @EnableGlobalAuthentication (see: CustomGlobalAuthenticationManagerBuilder)
  */
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class CustomWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
@@ -115,6 +116,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+
+            // SESSION MANAGEMENT
             .sessionManagement()
                 // Control How Spring Security Creates Session
                 // - ALWAYS – a session will always be created if one doesn't already exist
@@ -123,32 +126,56 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // - STATELESS – no session will be created or used by Spring Security
                 // This configuration only controls what Spring Security does – not the entire application
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                // Session Fixation Protection
+
+
+                // SESSION FIXATION PROTECTION
                 // configuring what happens to an existing session when the user tries to authenticate again
                 .sessionFixation()
                     .migrateSession() // (default) on authentication a new HTTP Session is created, the old one is invalidated and the attributes from the old session are copied over
 //                    .newSession() // a clean session will be created without any of the attributes from the old session being copied over
+                // use none() when using both HTTPS and HTTP. see: https://www.baeldung.com/spring-channel-security-https#2-disabling-session-fixation-protection
 //                    .none() // the original session will not be invalidated
 //                    .changeSessionId() // changes the current session id with a new one,
-
             .and()
 
-            //
+
+
+            // CROSS-SITE REQUEST FORGERY (CSRF) - https://www.baeldung.com/spring-security-csrf
+            // - CSRF protection is enabled by default in the Java configuration. We can still disable
+            //   it if we need to with .csrf().disable()
 //            .csrf().disable()
-            .authorizeRequests()
-            // the more specific rules need to come first, followed by the more general ones
-            .antMatchers("/", "/home", "/about", "/webjars/bootstrap/**").permitAll() // or place in WebSecurity.ignore.antMatchers
-            .antMatchers("/admin/**").hasRole("ADMIN")
-            .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-            .anyRequest().authenticated()
 
+
+
+            // AUTHORIZATION
+            .authorizeRequests()
+            // The more specific rules need to come first, followed by the more general ones
+                // allows users (including unauthenticated users) to access to the URLs
+                // you could also place in WebSecurity.ignore.antMatchers however this will cause ${#httpServletRequest.remoteUser} to be null
+                .antMatchers("/", "/home", "/about", "/webjars/bootstrap/**").permitAll()
+                // allows users to access without authentication
+                .antMatchers("/anon").anonymous()
+                // only users with role ADMIN can access /admin/**
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                // only users with either roles USER or ADMIN can access /user/**
+                .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                // All remaining URLs require that the user be successfully authenticated
+                .anyRequest().authenticated()
             .and()
 
-            // LOGIN STUFF
+
+
+            // BASIC LOGIN / LOGOUT
 //            .formLogin().loginPage("/login").permitAll()
 //            .and()
 //            .logout().permitAll();
-            .formLogin() //.permitAll()
+
+            // LOGIN STUFF
+            // see: https://www.baeldung.com/spring-security-login
+            // .formLogin() sets up form based authentication using the Java configuration defaults.
+            // Authentication is performed when a POST is submitted to the URL “/login” with the
+            // parameters “username” and “password”
+            .formLogin()
                 .loginPage("/login").permitAll() // the custom login page
                 // The default URL where the Spring Login will POST to trigger the authentication
                 // process is /login which used to be /j_spring_security_check before Spring Security 4.
@@ -181,5 +208,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .invalidateHttpSession(true)
 //                .addLogoutHandler(logoutHandler)
 //                .deleteCookies(cookieNamesToClear);
+
+
+
+        // HTTPS SECURING SSL/TLS
+        // this below requires /login* to be accessed only through HTTPS
+//        http.requiresChannel()
+//                .antMatchers("/login*")
+//            .requiresSecure();
+
+        // this below instructs Spring to use HTTP for all requests that are not explicitly
+        // configured to use HTTPS, but at the same time it breaks the original login mechanism
+        http.requiresChannel()
+                .anyRequest().requiresInsecure();
     }
 }

@@ -7,16 +7,18 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 
 /**
  * @EnableGlobalMethodSecurity
- * - prePostEnabled property enables Spring Security pre/post annotations (e.g. @PreFilter/@PostFilter/@PreAuthorized/@PostAuthorized)
- * - securedEnabled property determines if the @Secured annotation should be enabled
- * - jsr250Enabled property allows us to use the JSR-250 @RoleAllowed annotation
+ * - properties:
+ *   - prePostEnabled property enables Spring Security pre/post annotations (e.g. @PreFilter/@PostFilter/@PreAuthorized/@PostAuthorized)
+ *   - securedEnabled property determines if the @Secured annotation should be enabled
+ *   - jsr250Enabled property allows us to use the JSR-250 @RoleAllowed annotation
+ * - contains @EnableGlobalAuthentication (see: CustomGlobalAuthenticationManagerBuilder)
  */
 @Configuration
 @EnableGlobalMethodSecurity(
         prePostEnabled = true,
         securedEnabled = true,
         jsr250Enabled = true)
-public class GlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+public class CustomGlobalMethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {

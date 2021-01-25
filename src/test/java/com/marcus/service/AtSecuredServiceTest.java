@@ -1,6 +1,6 @@
 package com.marcus.service;
 
-import com.marcus.config.GlobalMethodSecurityConfig;
+import com.marcus.config.CustomGlobalMethodSecurityConfig;
 import com.marcus.service.methodsecurityexamples.AtSecuredService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
-@Import({AtSecuredService.class, GlobalMethodSecurityConfig.class})
+@Import({AtSecuredService.class, CustomGlobalMethodSecurityConfig.class})
 //@SpringBootTest
 public class AtSecuredServiceTest {
 

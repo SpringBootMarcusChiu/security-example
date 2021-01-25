@@ -26,6 +26,11 @@ public class DefaultController {
         return "/user";
     }
 
+    @GetMapping("/anon")
+    public String anon() {
+        return "/anon";
+    }
+
     @GetMapping("/about")
     public String about() {
         return "/about";
