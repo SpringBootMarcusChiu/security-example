@@ -14,7 +14,8 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
  *     // do something with CustomUser
  *     return "view";
  *   }
+ * - It also integrates with Spring Web MVC to add a CSRF token to forms
  */
-@EnableWebMvcSecurity
-public class CustomWebMvcSecurityConfig extends WebMvcSecurityConfiguration {
-}
+//@EnableWebMvcSecurity
+//public class CustomWebMvcSecurityConfig extends WebMvcSecurityConfiguration {
+//}

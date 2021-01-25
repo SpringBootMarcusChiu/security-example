@@ -3,6 +3,7 @@ package com.marcus.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
+ * Form Login Example
  * http://docs.spring.io/spring-boot/docs/current/reference/html/howto-security.html
  * @EnableWebSecurity
  * - annotation is crucial if we disable the default Spring Boot security configuration
@@ -20,9 +22,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  *   we're just overriding the default behavior using a WebSecurityConfigurerAdapter
  * - contains @EnableGlobalAuthentication (see: CustomGlobalAuthenticationManagerBuilder)
  */
+@Order(-1)
 @Configuration
 @EnableWebSecurity
-public class CustomWebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class CustomWebSecurity1_FormLogin_Config extends WebSecurityConfigurerAdapter {
 
     /**
      * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
