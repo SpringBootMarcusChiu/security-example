@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * Multiple HttpSecurity Example
  */
 @EnableWebSecurity
-public class CustomWebSecurity2Config {
+public class CustomWebSecurity3_MultipleHttpSecurity_Config {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {

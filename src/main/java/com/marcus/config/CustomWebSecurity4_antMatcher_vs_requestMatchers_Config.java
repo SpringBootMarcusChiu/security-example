@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * http.requestMatchers
  */
 @EnableWebSecurity
-public class CustomWebSecurity3Config {
+public class CustomWebSecurity4_antMatcher_vs_requestMatchers_Config {
 
     @Configuration
     @Order(3)
