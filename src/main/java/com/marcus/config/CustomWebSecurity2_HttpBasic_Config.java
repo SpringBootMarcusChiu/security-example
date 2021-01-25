@@ -21,9 +21,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class CustomWebSecurity2_HttpBasic_Config extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser("user").password(passwordEncoder().encode("password")).authorities("ROLE_USER");
+                .withUser("user").password(passwordEncoder.encode("password")).authorities("ROLE_USER");
     }
 
     @Override
@@ -34,11 +37,6 @@ public class CustomWebSecurity2_HttpBasic_Config extends WebSecurityConfigurerAd
                     .anyRequest().hasRole("ADMIN")
             .and()
                 .httpBasic(); // use HTTP Basic as authentication
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
 /*

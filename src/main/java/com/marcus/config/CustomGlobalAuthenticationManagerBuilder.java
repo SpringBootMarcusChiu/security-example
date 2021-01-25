@@ -12,9 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  *   a global instance of AuthenticationManagerBuilder with:
  *   public void configureGlobal(AuthenticationManagerBuilder auth) { ... }
  * - The following annotations are annotated with EnableGlobalAuthentication
- *   - EnableWebSecurity
- *   - EnableWebMvcSecurity
- *   - EnableGlobalMethodSecurity
+ *   - EnableWebSecurity    - see CustomWebSecurity1_FormLogin_Config.java
+ *   - EnableWebMvcSecurity - deprecated see CustomWebMvcSecurityConfig.java
+ *   - EnableGlobalMethodSecurity - see CustomGlobalMethodSecurityConfig.java
  * - Configuring AuthenticationManagerBuilder in a class without the EnableGlobalAuthentication
  *   annotation has unpredictable results.
  */
