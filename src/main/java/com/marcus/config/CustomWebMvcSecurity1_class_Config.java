@@ -2,7 +2,7 @@ package com.marcus.config;
 
 /**
  * NOTE: This is a NON SPRING SECURITY file
- * replaced by CustomWebMvcSecurity2_interface_Config.java
+ * REPLACED: by CustomWebMvcSecurity2_interface_Config.java
  * @EnableWebMvcSecurity - deprecated
  * - contains @EnableWebSecurity via WebMvcSecurityConfiguration hence it does
  *   everything @EnableWebSecurity does plus more
