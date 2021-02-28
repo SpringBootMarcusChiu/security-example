@@ -39,22 +39,6 @@ public class CustomWebSecurity1_FormLogin_Config extends WebSecurityConfigurerAd
         // the configuration applied to the Global can also be applied here
     }
 
-    @Override // Spring Boot has a default configuration for this already
-    public void configure(WebSecurity web) throws Exception {
-        web
-                // the following URl patterns to bypass Spring Security
-                .ignoring()
-                .antMatchers("/not-default/**") // resources/static/pokemon/**
-                .antMatchers("/resources/**")
-//                .antMatchers("/user/**") // this will cause ${#httpServletRequest.remoteUser} to be null
-//                .antMatchers("/admin/**") // this will cause ${#httpServletRequest.remoteUser} to be null
-                .antMatchers("/css/**")
-                .antMatchers("/js/**")
-                .antMatchers("/images/**");
-//                .antMatchers("/resources/**", "/static/**", "/css/**", "/js/**", "/images/**");
-        //                .requestMatchers(EndpointRequest.to("health"));
-    }
-
     @Override // Custom 403 access denied handler
     protected void configure(HttpSecurity http) throws Exception {
         http
