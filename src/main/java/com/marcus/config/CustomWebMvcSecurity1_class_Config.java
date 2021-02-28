@@ -1,8 +1,5 @@
 package com.marcus.config;
 
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.config.annotation.web.servlet.configuration.WebMvcSecurityConfiguration;
-
 /**
  * replaced by CustomWebMvcSecurity2_interface_Config.java
  * @EnableWebMvcSecurity - deprecated
