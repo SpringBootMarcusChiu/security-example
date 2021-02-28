@@ -12,11 +12,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CustomWebMvcSecurity2_interface_Config implements WebMvcConfigurer {
 
-    // TODO haven't tested this CORS
-//    @Override // Configuring CORS without Spring Security
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
-//                .allowedOrigins("*")
-//                .allowedHeaders("*");
-//    }
+    /**
+     * can also be handled globally by creating a `CorsConfigurationSource` bean like in `CustomWebSecurity6_global_cors_Config.java`
+     */
+    @Override // Configuring CORS without Spring Security
+    public void addCorsMappings(CorsRegistry registry) {
+        // this allows all resources to be CORS
+        // to allow authenticated resources add `http.cors().and()...` to HttpSecurity
+        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedOrigins("*")
+                .allowedHeaders("*");
+    }
 }

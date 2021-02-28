@@ -48,6 +48,7 @@ public class CustomWebSecurity6_global_cors_Config extends WebSecurityConfigurer
     /**
      * A Replacement of controller level @CrossOrigin
      * method name must be `corsConfigurationSource` in order to be picked up by Spring
+     * This whole `CorsConfigurationSource` can be replaced by `addCorsMappings(CorsRegistry registry)` in `CustomWebMvcSecurity2_interface_Config.java`
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
