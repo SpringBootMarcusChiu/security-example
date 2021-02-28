@@ -27,7 +27,7 @@ public class CustomWebSecurity3_MultipleHttpSecurity_Config {
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/web-security-3-multiple-http-security/api/**")
                     .authorizeRequests()
-                        .anyRequest().hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 .and()
                     .csrf().disable() // allow non GET requests
                     .httpBasic(); // use HTTP Basic as authentication

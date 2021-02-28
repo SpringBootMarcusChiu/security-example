@@ -23,6 +23,9 @@ public class CustomWebSecurity5_local_cors_Config extends WebSecurityConfigurerA
                 // allows /cors-local/** to be accessed CORS
                 // enables controller level @CrossOrigin annotations
                 // enables Spring Security CORS support and it will leverage Spring MVC configuration
+                // - By default uses a Bean by the name of `corsConfigurationSource`
+                //   If Spring MVC is on classpath and no CorsConfigurationSource is provided,
+                //   Spring Security will use CORS configuration provided to Spring MVC
                 .cors()
             .and()
                 .csrf().disable() // allow all other NON GET requests

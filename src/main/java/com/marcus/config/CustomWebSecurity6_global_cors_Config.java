@@ -28,7 +28,11 @@ public class CustomWebSecurity6_global_cors_Config extends WebSecurityConfigurer
                 // allows /cors-global/** to be accessed CORS
                 // enables controller level @CrossOrigin annotations
                 // enables Spring Security CORS support and it will leverage Spring MVC configuration
+                // - By default uses a Bean by the name of `corsConfigurationSource`
+                //   If Spring MVC is on classpath and no CorsConfigurationSource is provided,
+                //   Spring Security will use CORS configuration provided to Spring MVC
                 .cors()
+//                    .configurationSource(corsConfigurationSource()) // pass in custom CorsConfigurationSource
             .and()
                 .csrf().disable() // allow all other NON GET requests
                 .httpBasic();
@@ -43,12 +47,18 @@ public class CustomWebSecurity6_global_cors_Config extends WebSecurityConfigurer
 
     /**
      * A Replacement of controller level @CrossOrigin
-     * method name must be `corsConfigurationSource` in order to be picked up by Spring Boot
+     * method name must be `corsConfigurationSource` in order to be picked up by Spring
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/cors-global/**", new CorsConfiguration().applyPermitDefaultValues());
         return source;
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("https://example.com"));
+//        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
     }
 }

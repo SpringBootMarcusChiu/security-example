@@ -27,7 +27,7 @@ public class CustomWebSecurity2_HttpBasic_Config extends WebSecurityConfigurerAd
         // see: https://www.baeldung.com/spring-security-basic-authentication
         http.antMatcher("/web-security-2-http-basic/**")
                 .authorizeRequests()
-                    .anyRequest().hasRole("USER")
+                    .anyRequest().authenticated()
             .and()
                 .csrf().disable() // allow non GET requests
                 .httpBasic(); // use HTTP Basic as authentication

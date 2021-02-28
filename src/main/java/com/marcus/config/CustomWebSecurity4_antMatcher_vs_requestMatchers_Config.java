@@ -21,7 +21,7 @@ public class CustomWebSecurity4_antMatcher_vs_requestMatchers_Config {
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/api/v1/**")
                     .authorizeRequests()
-                        .anyRequest().hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 .and()
                     .httpBasic();
         }
@@ -39,7 +39,7 @@ public class CustomWebSecurity4_antMatcher_vs_requestMatchers_Config {
                         .antMatchers("/api/v2/**")
                 .and()
                     .authorizeRequests()
-                        .anyRequest().hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 .and()
                     .httpBasic();
         }
