@@ -1,44 +1,40 @@
 package com.marcus.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Http Basic Authentication Example
  * https://www.baeldung.com/spring-security-basic-authentication
  */
-@Order(0)
+@Order(100)
+//@EnableWebSecurity
 @Configuration
-@EnableWebSecurity
 public class CustomWebSecurity2_HttpBasic_Config extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("user").password(passwordEncoder.encode("password")).authorities("ROLE_USER");
-    }
+//    @Autowired
+//    PasswordEncoder passwordEncoder;
+//    @Autowired
+//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        // may add additional configuration to existing Global AuthenticationManagerBuilder
+//        // see CustomGlobalAuthenticationManagerBuilder.java
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // see: https://www.baeldung.com/spring-security-basic-authentication
-        http.antMatcher("/http-basic/**")
+        http.antMatcher("/web-security-2-http-basic/**")
                 .authorizeRequests()
-                    .anyRequest().hasRole("ADMIN")
+                    .anyRequest().hasRole("USER")
             .and()
+                .csrf().disable() // allow non GET requests
                 .httpBasic(); // use HTTP Basic as authentication
     }
 }
 /*
-curl -i --user username:password http://localhost:8080/http-basic/test
+curl -i --user user:password http://localhost:8080/web-security-2-http-basic
+curl -i --user user:password http://localhost:8080/web-security-2-http-basic -X POST
  */

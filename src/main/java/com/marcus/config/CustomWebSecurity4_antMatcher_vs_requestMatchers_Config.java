@@ -11,11 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * vs
  * http.requestMatchers
  */
-@EnableWebSecurity
+@Configuration
+//@EnableWebSecurity
 public class CustomWebSecurity4_antMatcher_vs_requestMatchers_Config {
 
     @Configuration
-    @Order(3)
+    @Order(104)
     public static class Api1WebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -28,7 +29,7 @@ public class CustomWebSecurity4_antMatcher_vs_requestMatchers_Config {
     }
 
     @Configuration
-    @Order(4)
+    @Order(105)
     public static class Api1And2WebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         @Override

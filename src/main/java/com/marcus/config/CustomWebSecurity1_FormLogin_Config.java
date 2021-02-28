@@ -1,18 +1,14 @@
 package com.marcus.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Form Login Example
@@ -23,82 +19,32 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  *   we're just overriding the default behavior using a WebSecurityConfigurerAdapter
  * - contains @EnableGlobalAuthentication (see: CustomGlobalAuthenticationManagerBuilder)
  */
-@Order(-1)
+@Order(2147483647)
 @Configuration
-@EnableWebSecurity // @EnableGlobalAuthentication
+//@EnableWebSecurity //@EnableGlobalAuthentication
 public class CustomWebSecurity1_FormLogin_Config extends WebSecurityConfigurerAdapter {
 
-    /**
-     * need to use the PasswordEncoder to set the passwords when using Spring Boot 2
-     * For more details, see our guide on the Default Password Encoder in Spring Security 5:
-     * - https://www.baeldung.com/spring-security-5-default-password-encoder
-     * @return PasswordEncoder
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+//    There are 2 ways to configure AuthenticationManagerBuilder:
+//    - global: via @Autowired
+//    - local: via @Override
 
-    ///////////////
-    // AUTOWIRED //
-    ///////////////
-
-    /*
-    There are 2 ways to configure AuthenticationManagerBuilder:
-    - global: via @Autowired
-    - local: via @Override
-     */
-
-    /**
-     * Global AuthenticationManagerBuilder
-     * @param auth AuthenticationManagerBuilder
-     * @throws Exception exception
-     */
-    @Autowired
+    @Autowired // Global AuthenticationManagerBuilder
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("user").password(passwordEncoder().encode("password")).roles("USER")
-                .and()
-                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
+        // may add additional configuration to existing Global AuthenticationManagerBuilder
+        // see CustomGlobalAuthenticationManagerBuilder.java
     }
 
-    //////////////
-    // OVERRIDE //
-    //////////////
+    @Override // Local Anonymous AuthenticationManagerBuilder
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        // configure Local AuthenticationManagerBuilder which is only applied within this class
+        // the configuration applied to the Global can also be applied here
+    }
 
-//    /**
-//     * Local Anonymous AuthenticationManagerBuilder
-//     * @param auth AuthenticationManagerBuilder
-//     * @throws Exception exception
-//     */
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        // 1 - In Memory Authentication
-//        auth.inMemoryAuthentication().passwordEncoder(passwordEncoder())
-//                .withUser("user").password(passwordEncoder().encode("password")).roles("USER")
-//                .and()
-//                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
-//
-//        // 2 - JDBC Authentication
-////        auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder())
-////                .withDefaultSchema() // creates 2 tables: Users & Authorities
-////                .withUser("user1").password(passwordEncoder().encode("password")).roles("USER")
-////                .and()
-////                .withUser("admin").password(passwordEncoder().encode("password")).roles("ADMIN");
-//
-//        // 3 - UserDetailsService
-////        auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
-//    }
-
-    /**
-     * Spring Boot has a default configuration for this already.
-     * @param web WebSecurity
-     * @throws Exception exception
-     */
-    @Override
+    @Override // Spring Boot has a default configuration for this already
     public void configure(WebSecurity web) throws Exception {
         web
-                .ignoring() // the following URl patterns to bypass Spring Security
+                // the following URl patterns to bypass Spring Security
+                .ignoring()
                 .antMatchers("/not-default/**") // resources/static/pokemon/**
                 .antMatchers("/resources/**")
 //                .antMatchers("/user/**") // this will cause ${#httpServletRequest.remoteUser} to be null
@@ -110,14 +56,7 @@ public class CustomWebSecurity1_FormLogin_Config extends WebSecurityConfigurerAd
         //                .requestMatchers(EndpointRequest.to("health"));
     }
 
-    /**
-     * role admin allow to access /admin/**
-     * role user allow to access /user/**
-     * custom 403 access denied handler
-     * @param http HttpSecurity
-     * @throws Exception exception
-     */
-    @Override
+    @Override // Custom 403 access denied handler
     protected void configure(HttpSecurity http) throws Exception {
         http
 

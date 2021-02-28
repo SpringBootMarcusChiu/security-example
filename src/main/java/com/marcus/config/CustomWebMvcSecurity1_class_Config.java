@@ -4,6 +4,7 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
 import org.springframework.security.config.annotation.web.servlet.configuration.WebMvcSecurityConfiguration;
 
 /**
+ * replaced by CustomWebMvcSecurity2_interface_Config.java
  * @EnableWebMvcSecurity - deprecated
  * - contains @EnableWebSecurity via WebMvcSecurityConfiguration hence it does
  *   everything @EnableWebSecurity does plus more
